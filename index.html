@@ -154,7 +154,7 @@
 
     .grid {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 8px;
     }
 
@@ -279,7 +279,7 @@
         <div class="text-center">
           <h1>ひよこ当てゲーム</h1>
           <p class="text-sub mt-2">
-            10匹のひよこの中から、<br />
+            9匹のひよこの中から、<br />
             相手がひそかに選んだ1匹を質問で当てるゲーム。
           </p>
           <span class="chip mt-2">対面で遊ぶ前提のプロトタイプ</span>
@@ -317,6 +317,10 @@
         <p class="text-sub mt-1">
           質問するたびに「質問したので +1」を押して、質問回数をカウントする。<br />
           「もう当てにいく」を押すと、どのひよこかを選ぶ画面に進む。
+        </p>
+        <div id="question-grid" class="grid mt-3"></div>
+        <p class="text-note">
+          ※ 質問者・回答者どちらも、この9匹を見ながらやりとりする。
         </p>
         <div class="section mt-3">
           <div class="counter-row">
@@ -380,26 +384,35 @@
     </div>
   </div>
 
-    <script>
+  <script>
     // --- 名前・性別・ひよこ画像データ生成 ---------------------------
 
     const NAMES_CUTE = [
-      "モモ", "ピヨ", "ココ", "ミミ", "プチ",
-      "ぽん", "きいろ", "ちゅん", "すず", "ぴよまる"
-    ];
+  "きいろ", "ちゅん", "ぴよまる", "たまご", "こむぎ", "まめ", "みるく", "ぷりん", "ちっぴ", "ほっぺ",
+  "ぴっぴ", "たま", "ちーず", "わた", "こつぶ", "プリン", "ぴーす", "おもち", "きなこ", "おはぎ",
+  "バター", "だんご", "ビスコ", "みたらし", "うどん", "ラーメン", "カレー"
+];
     const NAMES_TOUGH = [
-      "太蔵", "剛志", "玄人", "武蔵", "隼人",
-      "大河", "昇龍", "剣", "鉄平", "烈火"
-    ];
+  "太蔵", "剛志", "玄人（くろうと）", "武蔵", "隼人", "大河", "昇龍", "剣（つるぎ）", "鉄平", "烈火",
+  "迅（じん）", "雷（いかずち）", "隼（はやぶさ）", "大牙（たいが）", "魁（かい）", "一徹", "牙（きば）",
+  "巌（いわお）", "陣（じん）", "剛", "王牙（おうが）", "竜馬", "豪", "斬（ざん）", "虎鉄", "十兵衛", "塊（かい）"
+];
     const NAMES_AMERICAN = [
-      "チャーリー", "ビリー", "デイジー", "モリー", "バディ",
-      "サニー", "クーパー", "リリー", "マックス", "ペニー"
-    ];
+  "チャーリー", "デイジー", "マックス", "レオン", "エリオット", "ヴィンセント", "ローガン", "ジェイク",
+  "ハリソン", "スカーレット", "ドクター", "モーガン", "クリス", "マディソン", "オーウェン",
+  "シドニー", "ゴッサム", "ダグラス"
+];
 
-    const ALL_NAMES = [...NAMES_CUTE, ...NAMES_TOUGH, ...NAMES_AMERICAN];
+    const NAMES_OJISAN = [
+  "ひろし", "まさお", "えいじ", "けんいち", "たけし", "しげお", "よしお", "たかし", "あきお", "かずお",
+  "としゆき", "つよし", "としお", "みのる", "さとし", "さだお", "ひでかず", "のりお", "まさし", "けんじ",
+  "たつお", "きよし", "よしあき", "えいさく"
+];
+
+const ALL_NAMES = [...NAMES_CUTE, ...NAMES_TOUGH, ...NAMES_AMERICAN, ...NAMES_OJISAN];
     const MAX_QUESTIONS = 10;
 
-    // ひよこ画像 URL リスト（いただいたものをそのまま使用）
+    // ひよこ画像 URL リスト
     const IMAGE_URLS = [
       "https://thumbs.dreamstime.com/b/petit-poussin-mignon-dehors-59498627.jpg",
       "https://img.lovepik.com/photo/60162/4812.jpg_wh860.jpg",
@@ -417,14 +430,22 @@
       "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQbO4PYDYcgsCdPIdujX7UDnpIhcbFIiKVwVg&s",
       "https://baseec-img-mng.akamaized.net/images/item/origin/818272a029b9dd2e628135e5933e8ea7.jpg?imformat=generic",
       "https://stat.ameba.jp/user_images/20190425/23/goma-tuki/2e/e2/j/o0640048014397713972.jpg",
-      "https://png.pngtree.com/png-clipart/20240520/original/pngtree-cute-fluffy-little-chick-hatches-from-a-huge-egg-png-image_15140470.png"
-
+      "https://png.pngtree.com/png-clipart/20240520/original/pngtree-cute-fluffy-little-chick-hatches-from-a-huge-egg-png-image_15140470.png",
+      "https://p.potaufeu.asahi.com/e110-p/picture/26989847/0a464ee4c83747cb8ea8f0b705520b7b_640px.jpg",
+      "https://prcdn.freetls.fastly.net/release_image/18131/5353/18131-5353-b07b6895b724d10059c6d74e3d304bbf-1000x1000.jpg?format=jpeg&auto=webp&fit=bounds&width=2400&height=1260",
+      "https://img.freepik.com/premium-photo/cute-chick-wooden-surface-closeup-baby-animal_495423-64753.jpg",
+      "https://media.istockphoto.com/id/1153077069/ja/%E3%82%B9%E3%83%88%E3%83%83%E3%82%AF%E3%83%95%E3%82%A9%E3%83%88/%E3%81%B2%E3%82%88%E3%81%93%E8%8B%A5%E3%81%84%E8%B5%A4%E3%81%A1%E3%82%83%E3%82%93%E3%81%AF%E5%AE%B6%E7%A6%BD%E8%BE%B2%E5%A0%B4%E3%81%A7%E5%BD%BC%E3%82%92%E6%8E%A2%E3%81%97%E3%81%A6%E3%81%84%E3%81%BE%E3%81%99%E8%B5%A4%E3%81%A1%E3%82%83%E3%82%93%E3%81%B2%E3%82%88%E3%81%93%E3%81%8B%E3%82%8F%E3%81%84%E3%81%84%E7%84%A1%E9%82%AA%E6%B0%97%E3%82%B3%E3%83%B3%E3%82%BB%E3%83%97%E3%83%88.jpg?s=1024x1024&w=is&k=20&c=MrfMoCgNnznRXKIxDPohUh7J44ha_kpQ4A1qvqwjKWk=",
+      "https://previews.123rf.com/images/takadahiroto/takadahiroto1611/takadahiroto161100007/66968771-cute-baby-chick.jpg",
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRstQorrj2RXLH4yzg8EOhfN-2VW5XxFjPlHwCJo7bKIVGMh6FwpWqo4QGb4F1uhIqn9Ys&usqp=CAU",
+      "https://www.publicdomainpictures.net/pictures/100000/nahled/cute-baby-chick.jpg",
+      "https://d2o4rrq92x9csx.cloudfront.net/articles/Gazo_2507-4-123.webp",
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTxtnBI3L3etsu-BX6N3-XZY9-DKLaEQyayBvgLahcnEAdAnHUVNZ0eTlkaqwxdfcpZPgs&usqp=CAU",
+      "https://eternalcollegest.com/wp-content/uploads/2020/04/hiyoko-3-43.jpg",
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRHisx-HsnwL5_3EeVflgiIi3PewZmBIAxhtA&s"
     ];
 
-// 壊れた画像用のフォールバック（ひよこ画像）
-const FALLBACK_IMAGE_URL =
-  "https://thumbs.dreamstime.com/b/petit-poussin-mignon-dehors-59498627.jpg";
-
+    // フォールバック用のひよこ画像プール（生成時にセット）
+    let fallbackImagePool = [];
 
     /** @returns {"male"|"female"} */
     function randomGender() {
@@ -435,37 +456,38 @@ const FALLBACK_IMAGE_URL =
       return arr[Math.floor(Math.random() * arr.length)];
     }
 
-// 名前・画像を「重複なし」で割り当てる
-function generateChicks(count = 10) {
-  // 利用可能な最大枚数（名前・画像のどちらかが足りない場合に備えて保険）
-  const maxCount = Math.min(count, ALL_NAMES.length, IMAGE_URLS.length);
+    // 名前・画像を「重複なし」で9体分割り当てる
+    function generateChicks(count = 9) {
+      const maxCount = Math.min(count, ALL_NAMES.length, IMAGE_URLS.length);
 
-  // シャッフル用にコピー
-  const namesPool = [...ALL_NAMES];
-  const imagesPool = [...IMAGE_URLS];
+      const namesPool = [...ALL_NAMES];
+      const imagesPool = [...IMAGE_URLS];
 
-  // 単純なシャッフル
-  namesPool.sort(() => Math.random() - 0.5);
-  imagesPool.sort(() => Math.random() - 0.5);
+      namesPool.sort(() => Math.random() - 0.5);
+      imagesPool.sort(() => Math.random() - 0.5);
 
-  const result = [];
-  const now = Date.now();
+      const result = [];
+      const now = Date.now();
 
-  for (let i = 0; i < maxCount; i += 1) {
-    const name = namesPool[i];       // ここで重複なし
-    const imageUrl = imagesPool[i];  // ここで重複なし
+      // ひよこ本体に使う画像（重複なし）
+      const usedImages = imagesPool.slice(0, maxCount);
+      // 壊れたときに差し込む候補（まだ使っていない画像）
+      fallbackImagePool = imagesPool.slice(maxCount);
 
-    result.push({
-      id: "chick-" + i + "-" + now + "-" + Math.random().toString(16).slice(2),
-      name,
-      gender: randomGender(),
-      imageUrl
-    });
-  }
+      for (let i = 0; i < maxCount; i += 1) {
+        const name = namesPool[i];
+        const imageUrl = usedImages[i];
 
-  return result;
-}
+        result.push({
+          id: "chick-" + i + "-" + now + "-" + Math.random().toString(16).slice(2),
+          name,
+          gender: randomGender(),
+          imageUrl
+        });
+      }
 
+      return result;
+    }
 
     // --- 状態 ------------------------------------------------------
 
@@ -489,6 +511,7 @@ function generateChicks(count = 10) {
     const questionMaxEl      = document.getElementById("question-max");
     const questionProgressEl = document.getElementById("question-progress");
     const questionWarningEl  = document.getElementById("question-warning");
+    const questionGrid       = document.getElementById("question-grid");
     const questionPlusBtn    = document.getElementById("question-plus-btn");
     const goGuessBtn         = document.getElementById("go-guess-btn");
     const guessGrid          = document.getElementById("guess-grid");
@@ -514,24 +537,28 @@ function generateChicks(count = 10) {
 
     // --- UI レンダリング -------------------------------------------
 
-function createChickImageElement(chick) {
-  const img = document.createElement("img");
-  img.src = chick.imageUrl;
-  img.alt = chick.name;
-  img.style.width = "100%";
-  img.style.height = "100%";
-  img.style.objectFit = "cover";
-  img.loading = "lazy";
+    function createChickImageElement(chick) {
+      const img = document.createElement("img");
+      img.src = chick.imageUrl;
+      img.alt = chick.name;
+      img.style.width = "100%";
+      img.style.height = "100%";
+      img.style.objectFit = "cover";
+      img.loading = "lazy";
 
-  // 壊れた画像はフォールバックひよこ画像に差し替え（🐣は出さない）
-  img.onerror = () => {
-    img.onerror = null; // 無限ループ防止
-    img.src = FALLBACK_IMAGE_URL;
-  };
+      // 壊れた画像は、まだ使っていない画像の中から差し替え
+      img.onerror = () => {
+        img.onerror = null;
+        if (fallbackImagePool && fallbackImagePool.length > 0) {
+          img.src = fallbackImagePool.shift();
+        } else {
+          // すべて使い切っていた場合は、最後の手段として最初の画像を再利用
+          img.src = IMAGE_URLS[0];
+        }
+      };
 
-  return img;
-}
-
+      return img;
+    }
 
     function renderSelectGrid() {
       selectGrid.innerHTML = "";
@@ -548,7 +575,6 @@ function createChickImageElement(chick) {
         const inner = document.createElement("div");
         inner.className = "chick-visual-inner";
 
-        // 画像を挿入
         inner.appendChild(createChickImageElement(chick));
         visual.appendChild(inner);
 
@@ -588,7 +614,6 @@ function createChickImageElement(chick) {
         const inner = document.createElement("div");
         inner.className = "chick-visual-inner";
 
-        // 画像を挿入
         inner.appendChild(createChickImageElement(chick));
         visual.appendChild(inner);
 
@@ -612,6 +637,41 @@ function createChickImageElement(chick) {
         });
 
         guessGrid.appendChild(card);
+      });
+    }
+
+    // 質問タイム用：9匹を一覧で表示（選択操作なし）
+    function renderQuestionGrid() {
+      if (!questionGrid) return;
+      questionGrid.innerHTML = "";
+      chicks.forEach(chick => {
+        const card = document.createElement("div");
+        card.className = "chick-card";
+        card.dataset.id = chick.id;
+
+        const visual = document.createElement("div");
+        visual.className = "chick-visual";
+        const inner = document.createElement("div");
+        inner.className = "chick-visual-inner";
+
+        inner.appendChild(createChickImageElement(chick));
+        visual.appendChild(inner);
+
+        const meta = document.createElement("div");
+        meta.className = "chick-meta";
+        const nameSpan = document.createElement("span");
+        nameSpan.textContent = chick.name;
+        const genderSpan = document.createElement("span");
+        genderSpan.className = "gender-tag";
+        genderSpan.textContent = chick.gender === "male" ? "♂" : "♀";
+
+        meta.appendChild(nameSpan);
+        meta.appendChild(genderSpan);
+
+        card.appendChild(visual);
+        card.appendChild(meta);
+
+        questionGrid.appendChild(card);
       });
     }
 
@@ -654,7 +714,7 @@ function createChickImageElement(chick) {
     // --- イベント設定 ----------------------------------------------
 
     startBtn.addEventListener("click", () => {
-      chicks = generateChicks(10);
+      chicks = generateChicks(9);
       secretChickId = null;
       guessChickId = null;
       questionCount = 0;
@@ -667,6 +727,7 @@ function createChickImageElement(chick) {
       if (!secretChickId) return;
       questionCount = 0;
       renderQuestionStatus();
+      renderQuestionGrid();
       showView("question");
     });
 
@@ -682,7 +743,7 @@ function createChickImageElement(chick) {
     });
 
     replayBtn.addEventListener("click", () => {
-      chicks = generateChicks(10);
+      chicks = generateChicks(9);
       secretChickId = null;
       guessChickId = null;
       questionCount = 0;
