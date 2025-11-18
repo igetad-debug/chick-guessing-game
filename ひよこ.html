@@ -1,0 +1,702 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>ひよこ当てゲーム プロトタイプ</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    :root {
+      --yellow-bg: #fff7d6;
+      --yellow-main: #facc15;
+      --yellow-deep: #f59e0b;
+      --border-soft: #e5e7eb;
+      --text-main: #111827;
+      --text-sub: #6b7280;
+      --danger: #ef4444;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
+      background: var(--yellow-bg);
+      color: var(--text-main);
+    }
+
+    .app-root {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 420px;
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+      border: 1px solid #fef3c7;
+      padding: 16px 16px 20px;
+    }
+
+    h1, h2 {
+      margin: 0;
+    }
+
+    h1 {
+      font-size: 20px;
+      font-weight: 700;
+      color: #92400e;
+    }
+
+    h2 {
+      font-size: 18px;
+      font-weight: 600;
+      color: #92400e;
+    }
+
+    p {
+      margin: 0;
+    }
+
+    .text-sub {
+      font-size: 13px;
+      color: var(--text-sub);
+      line-height: 1.5;
+    }
+
+    .text-note {
+      font-size: 11px;
+      color: var(--text-sub);
+      margin-top: 4px;
+    }
+
+    .text-center {
+      text-align: center;
+    }
+
+    .mt-2 { margin-top: 8px; }
+    .mt-3 { margin-top: 12px; }
+    .mt-4 { margin-top: 16px; }
+    .mt-6 { margin-top: 24px; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: none;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s ease, transform 0.05s ease, box-shadow 0.15s ease;
+    }
+
+    .btn-primary {
+      background: var(--yellow-main);
+      color: #78350f;
+      box-shadow: 0 4px 12px rgba(250, 204, 21, 0.5);
+    }
+
+    .btn-primary:hover {
+      background: #fde047;
+      transform: translateY(-1px);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 8px rgba(250, 204, 21, 0.4);
+    }
+
+    .btn-outline {
+      background: #fff;
+      color: var(--text-main);
+      border: 1px solid var(--border-soft);
+    }
+
+    .btn-outline:hover {
+      background: #f9fafb;
+    }
+
+    .btn-sm {
+      padding: 7px 10px;
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .btn[disabled] {
+      opacity: 0.5;
+      cursor: not-allowed;
+      box-shadow: none;
+      transform: none;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      background: #fef3c7;
+      color: #92400e;
+      border: 1px solid #fed7aa;
+      margin-top: 4px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .chick-card {
+      border-radius: 14px;
+      background: #fff;
+      border: 1px solid var(--border-soft);
+      padding: 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      cursor: pointer;
+      transition: border 0.12s ease, box-shadow 0.12s ease, transform 0.05s ease;
+    }
+
+    .chick-card:hover {
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06);
+      transform: translateY(-1px);
+    }
+
+    .chick-card.selected {
+      border: 2px solid var(--yellow-deep);
+      box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.2);
+    }
+
+    .chick-visual {
+      width: 100%;
+      padding-top: 100%;
+      border-radius: 10px;
+      background: #fef3c7;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .chick-visual-inner {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+    }
+
+    .chick-meta {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .gender-tag {
+      font-size: 11px;
+      color: var(--text-sub);
+    }
+
+    .section {
+      margin-top: 12px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+
+    .counter-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      font-size: 13px;
+      margin-bottom: 6px;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 7px;
+      border-radius: 999px;
+      background: #e5e7eb;
+      overflow: hidden;
+    }
+
+    .progress-value {
+      height: 100%;
+      border-radius: 999px;
+      background: var(--yellow-main);
+      width: 0%;
+      transition: width 0.15s ease;
+    }
+
+    .text-danger {
+      color: var(--danger);
+      font-size: 11px;
+      margin-top: 4px;
+    }
+
+    .result-visual {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .result-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #92400e;
+    }
+
+    .result-sub {
+      font-size: 13px;
+      color: var(--text-sub);
+    }
+  </style>
+</head>
+<body>
+  <div class="app-root">
+    <div class="card">
+      <div id="view-start">
+        <div class="text-center">
+          <h1>ひよこ当てゲーム</h1>
+          <p class="text-sub mt-2">
+            10匹のひよこの中から、<br />
+            相手がひそかに選んだ1匹を質問で当てるゲーム。
+          </p>
+          <span class="chip mt-2">対面で遊ぶ前提のプロトタイプ</span>
+        </div>
+        <button id="start-btn" class="btn btn-primary mt-4">
+          ゲームをはじめる
+        </button>
+        <p class="text-note mt-3">
+          1. 回答者がスマホを持ち、ひよこを1匹えらぶ<br />
+          2. そのあと質問者にスマホを渡す<br />
+          3. 質問者は口頭で質問しながら、どのひよこか当てにいく
+        </p>
+      </div>
+
+      <div id="view-select" style="display:none;">
+        <h2>回答者のひよこえらび</h2>
+        <p class="text-sub mt-1">
+          回答者だけが画面を見て、ひよこを1匹タップして選ぶ。<br />
+          選べたら「選んだ！」ボタンを押して、質問者にスマホを渡す。
+        </p>
+        <div id="select-grid" class="grid mt-3"></div>
+        <button id="confirm-secret-btn" class="btn btn-primary mt-4" disabled>
+          このひよこに決めた！
+        </button>
+        <p class="text-note">
+          ※ 選んだひよこは質問者には見せないでください。
+        </p>
+      </div>
+
+      <div id="view-question" style="display:none;">
+        <div class="section-header">
+          <h2>質問タイム</h2>
+          <span class="chip">質問は口頭で</span>
+        </div>
+        <p class="text-sub mt-1">
+          質問するたびに「質問したので +1」を押して、質問回数をカウントする。<br />
+          「もう当てにいく」を押すと、どのひよこかを選ぶ画面に進む。
+        </p>
+        <div class="section mt-3">
+          <div class="counter-row">
+            <span>質問回数</span>
+            <span><span id="question-count">0</span> / <span id="question-max">10</span></span>
+          </div>
+          <div class="progress-bar">
+            <div id="question-progress" class="progress-value"></div>
+          </div>
+          <div id="question-warning" class="text-danger" style="display:none;">
+            これ以上は質問できない。そろそろ、どのひよこか当てにいこう。
+          </div>
+        </div>
+        <div class="section mt-3">
+          <button id="question-plus-btn" class="btn btn-primary">
+            質問したので +1
+          </button>
+          <button id="go-guess-btn" class="btn btn-outline mt-2">
+            もう当てにいく
+          </button>
+        </div>
+      </div>
+
+      <div id="view-guess" style="display:none;">
+        <h2>どのひよこだった？</h2>
+        <p class="text-sub mt-1">
+          口頭のやりとりを思い出して、相手がえらんだと思うひよこを1匹タップする。
+        </p>
+        <div id="guess-grid" class="grid mt-3"></div>
+        <p class="text-note">
+          タップしたひよこが、あなたの最終回答になる。
+        </p>
+      </div>
+
+      <div id="view-result" style="display:none;">
+        <div class="text-center">
+          <div id="result-title" class="result-title">結果</div>
+          <div id="result-message" class="result-sub mt-1"></div>
+        </div>
+        <div class="result-visual">
+          <div class="chick-visual" style="width:128px;">
+            <div class="chick-visual-inner">
+              <span id="result-emoji" style="font-size:34px;">🐣</span>
+            </div>
+          </div>
+          <div id="result-name" class="mt-1" style="font-size:14px;font-weight:600;"></div>
+          <div id="result-gender" style="font-size:12px;color:var(--text-sub);"></div>
+        </div>
+        <p class="text-sub mt-3 text-center">
+          質問回数: <span id="result-questions">0</span> 回
+        </p>
+        <div class="section mt-4">
+          <button id="replay-btn" class="btn btn-primary">
+            もう一度あそぶ
+          </button>
+          <button id="back-home-btn" class="btn btn-outline mt-2">
+            ホームにもどる
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+    <script>
+    // --- 名前・性別・ひよこ画像データ生成 ---------------------------
+
+    const NAMES_CUTE = [
+      "モモ", "ピヨ", "ココ", "ミミ", "プチ",
+      "ぽん", "きいろ", "ちゅん", "すず", "ぴよまる"
+    ];
+    const NAMES_TOUGH = [
+      "太蔵", "剛志", "玄人", "武蔵", "隼人",
+      "大河", "昇龍", "剣", "鉄平", "烈火"
+    ];
+    const NAMES_AMERICAN = [
+      "チャーリー", "ビリー", "デイジー", "モリー", "バディ",
+      "サニー", "クーパー", "リリー", "マックス", "ペニー"
+    ];
+
+    const ALL_NAMES = [...NAMES_CUTE, ...NAMES_TOUGH, ...NAMES_AMERICAN];
+    const MAX_QUESTIONS = 10;
+
+    // ひよこ画像 URL リスト（いただいたものをそのまま使用）
+    const IMAGE_URLS = [
+      "https://thumbs.dreamstime.com/b/petit-poussin-mignon-dehors-59498627.jpg",
+      "https://img.lovepik.com/photo/60162/4812.jpg_wh860.jpg",
+      "https://img.lovepik.com/photo/60181/3115.jpg_wh860.jpg",
+      "https://i.pinimg.com/474x/f5/11/b4/f511b40b1466a4f7ef540a78ed7a238e.jpg",
+      "https://www.publicdomainpictures.net/pictures/160000/nahled/mignon-poussin-jaune.jpg",
+      "https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.tradexgroups.com%2Findex.phppshopdetail%2F159014442&psig=AOvVaw21u6mLBCstWXA9GZHdq5JW&ust=1763538414657000&source=images&cd=vfe&opi=89978449&ved=0CBUQjRxqFwoTCNC64dma-5ADFQAAAAAdAAAAABBY",
+      "https://www.google.com/url?sa=i&url=http%3A%2F%2Fblog.livedoor.jp%2Fpikchu123%2Farchives%2F1079691913.html&psig=AOvVaw21u6mLBCstWXA9GZHdq5JW&ust=1763538414657000&source=images&cd=vfe&opi=89978449&ved=0CBUQjRxqFwoTCNC64dma-5ADFQAAAAAdAAAAABBi",
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR2toZz9gZ_Ini3LkQOaKDR7z1eSsfL6033Qg&s",
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT5M-K-sQjMBNTk_hrVtEMNzWQpJrndKLTl1g&s",
+      "https://cdn.qleanmarket.amanaimages.com/uploads/items/032/033/34/preview/FYI03203334.jpg",
+      "https://www.photolibrary.jp/mhd2/img498/450-2016110515152173081.jpg",
+      "https://www.nitori-net.jp/ecstatic/image/product/7980723/798072301.jpg?ts=20240208101825572&imwidth=500&imdensity=1",
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS4LXoT6HdzcHUxFMbRivxRSGeort69zkLcbw&s",
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQbO4PYDYcgsCdPIdujX7UDnpIhcbFIiKVwVg&s",
+      "https://baseec-img-mng.akamaized.net/images/item/origin/818272a029b9dd2e628135e5933e8ea7.jpg?imformat=generic",
+      "https://stat.ameba.jp/user_images/20190425/23/goma-tuki/2e/e2/j/o0640048014397713972.jpg",
+      "https://png.pngtree.com/png-clipart/20240520/original/pngtree-cute-fluffy-little-chick-hatches-from-a-huge-egg-png-image_15140470.png"
+
+    ];
+
+// 壊れた画像用のフォールバック（ひよこ画像）
+const FALLBACK_IMAGE_URL =
+  "https://thumbs.dreamstime.com/b/petit-poussin-mignon-dehors-59498627.jpg";
+
+
+    /** @returns {"male"|"female"} */
+    function randomGender() {
+      return Math.random() < 0.5 ? "male" : "female";
+    }
+
+    function randomItem(arr) {
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+// 名前・画像を「重複なし」で割り当てる
+function generateChicks(count = 10) {
+  // 利用可能な最大枚数（名前・画像のどちらかが足りない場合に備えて保険）
+  const maxCount = Math.min(count, ALL_NAMES.length, IMAGE_URLS.length);
+
+  // シャッフル用にコピー
+  const namesPool = [...ALL_NAMES];
+  const imagesPool = [...IMAGE_URLS];
+
+  // 単純なシャッフル
+  namesPool.sort(() => Math.random() - 0.5);
+  imagesPool.sort(() => Math.random() - 0.5);
+
+  const result = [];
+  const now = Date.now();
+
+  for (let i = 0; i < maxCount; i += 1) {
+    const name = namesPool[i];       // ここで重複なし
+    const imageUrl = imagesPool[i];  // ここで重複なし
+
+    result.push({
+      id: "chick-" + i + "-" + now + "-" + Math.random().toString(16).slice(2),
+      name,
+      gender: randomGender(),
+      imageUrl
+    });
+  }
+
+  return result;
+}
+
+
+    // --- 状態 ------------------------------------------------------
+
+    let chicks = [];
+    let secretChickId = null; // 回答者が選んだひよこ
+    let guessChickId = null;  // 質問者の最終回答
+    let questionCount = 0;
+
+    // --- DOM ショートカット ----------------------------------------
+
+    const viewStart    = document.getElementById("view-start");
+    const viewSelect   = document.getElementById("view-select");
+    const viewQuestion = document.getElementById("view-question");
+    const viewGuess    = document.getElementById("view-guess");
+    const viewResult   = document.getElementById("view-result");
+
+    const startBtn           = document.getElementById("start-btn");
+    const selectGrid         = document.getElementById("select-grid");
+    const confirmSecretBtn   = document.getElementById("confirm-secret-btn");
+    const questionCountEl    = document.getElementById("question-count");
+    const questionMaxEl      = document.getElementById("question-max");
+    const questionProgressEl = document.getElementById("question-progress");
+    const questionWarningEl  = document.getElementById("question-warning");
+    const questionPlusBtn    = document.getElementById("question-plus-btn");
+    const goGuessBtn         = document.getElementById("go-guess-btn");
+    const guessGrid          = document.getElementById("guess-grid");
+
+    const resultTitleEl     = document.getElementById("result-title");
+    const resultMessageEl   = document.getElementById("result-message");
+    const resultEmojiEl     = document.getElementById("result-emoji");
+    const resultNameEl      = document.getElementById("result-name");
+    const resultGenderEl    = document.getElementById("result-gender");
+    const resultQuestionsEl = document.getElementById("result-questions");
+    const replayBtn         = document.getElementById("replay-btn");
+    const backHomeBtn       = document.getElementById("back-home-btn");
+
+    // --- 画面切り替え ----------------------------------------------
+
+    function showView(name) {
+      viewStart.style.display    = name === "start"    ? "" : "none";
+      viewSelect.style.display   = name === "select"   ? "" : "none";
+      viewQuestion.style.display = name === "question" ? "" : "none";
+      viewGuess.style.display    = name === "guess"    ? "" : "none";
+      viewResult.style.display   = name === "result"   ? "" : "none";
+    }
+
+    // --- UI レンダリング -------------------------------------------
+
+function createChickImageElement(chick) {
+  const img = document.createElement("img");
+  img.src = chick.imageUrl;
+  img.alt = chick.name;
+  img.style.width = "100%";
+  img.style.height = "100%";
+  img.style.objectFit = "cover";
+  img.loading = "lazy";
+
+  // 壊れた画像はフォールバックひよこ画像に差し替え（🐣は出さない）
+  img.onerror = () => {
+    img.onerror = null; // 無限ループ防止
+    img.src = FALLBACK_IMAGE_URL;
+  };
+
+  return img;
+}
+
+
+    function renderSelectGrid() {
+      selectGrid.innerHTML = "";
+      chicks.forEach(chick => {
+        const card = document.createElement("div");
+        card.className = "chick-card";
+        card.dataset.id = chick.id;
+        if (chick.id === secretChickId) {
+          card.classList.add("selected");
+        }
+
+        const visual = document.createElement("div");
+        visual.className = "chick-visual";
+        const inner = document.createElement("div");
+        inner.className = "chick-visual-inner";
+
+        // 画像を挿入
+        inner.appendChild(createChickImageElement(chick));
+        visual.appendChild(inner);
+
+        const meta = document.createElement("div");
+        meta.className = "chick-meta";
+        const nameSpan = document.createElement("span");
+        nameSpan.textContent = chick.name;
+        const genderSpan = document.createElement("span");
+        genderSpan.className = "gender-tag";
+        genderSpan.textContent = chick.gender === "male" ? "♂" : "♀";
+
+        meta.appendChild(nameSpan);
+        meta.appendChild(genderSpan);
+
+        card.appendChild(visual);
+        card.appendChild(meta);
+
+        card.addEventListener("click", () => {
+          secretChickId = chick.id;
+          renderSelectGrid();
+          confirmSecretBtn.disabled = false;
+        });
+
+        selectGrid.appendChild(card);
+      });
+    }
+
+    function renderGuessGrid() {
+      guessGrid.innerHTML = "";
+      chicks.forEach(chick => {
+        const card = document.createElement("div");
+        card.className = "chick-card";
+        card.dataset.id = chick.id;
+
+        const visual = document.createElement("div");
+        visual.className = "chick-visual";
+        const inner = document.createElement("div");
+        inner.className = "chick-visual-inner";
+
+        // 画像を挿入
+        inner.appendChild(createChickImageElement(chick));
+        visual.appendChild(inner);
+
+        const meta = document.createElement("div");
+        meta.className = "chick-meta";
+        const nameSpan = document.createElement("span");
+        nameSpan.textContent = chick.name;
+        const genderSpan = document.createElement("span");
+        genderSpan.className = "gender-tag";
+        genderSpan.textContent = chick.gender === "male" ? "♂" : "♀";
+
+        meta.appendChild(nameSpan);
+        meta.appendChild(genderSpan);
+
+        card.appendChild(visual);
+        card.appendChild(meta);
+
+        card.addEventListener("click", () => {
+          guessChickId = chick.id;
+          showResult();
+        });
+
+        guessGrid.appendChild(card);
+      });
+    }
+
+    function renderQuestionStatus() {
+      questionCountEl.textContent = String(questionCount);
+      questionMaxEl.textContent = String(MAX_QUESTIONS);
+      const ratio = Math.min(1, questionCount / MAX_QUESTIONS);
+      questionProgressEl.style.width = (ratio * 100) + "%";
+
+      if (questionCount >= MAX_QUESTIONS) {
+        questionWarningEl.style.display = "";
+        questionPlusBtn.disabled = true;
+      } else {
+        questionWarningEl.style.display = "none";
+        questionPlusBtn.disabled = false;
+      }
+    }
+
+    function showResult() {
+      if (!secretChickId || !guessChickId) return;
+
+      const secret = chicks.find(c => c.id === secretChickId);
+      const isCorrect = secretChickId === guessChickId;
+
+      if (!secret) return;
+
+      resultTitleEl.textContent = isCorrect ? "正解！" : "残念… はずれ";
+      resultEmojiEl.textContent = isCorrect ? "🎉" : "😢";
+      resultMessageEl.textContent = isCorrect
+        ? "見事に当てることができた。"
+        : "今回は外れてしまった。次は当てよう。";
+
+      resultNameEl.textContent = secret.name;
+      resultGenderEl.textContent = "性別: " + (secret.gender === "male" ? "♂" : "♀");
+      resultQuestionsEl.textContent = String(questionCount);
+
+      showView("result");
+    }
+
+    // --- イベント設定 ----------------------------------------------
+
+    startBtn.addEventListener("click", () => {
+      chicks = generateChicks(10);
+      secretChickId = null;
+      guessChickId = null;
+      questionCount = 0;
+      confirmSecretBtn.disabled = true;
+      renderSelectGrid();
+      showView("select");
+    });
+
+    confirmSecretBtn.addEventListener("click", () => {
+      if (!secretChickId) return;
+      questionCount = 0;
+      renderQuestionStatus();
+      showView("question");
+    });
+
+    questionPlusBtn.addEventListener("click", () => {
+      if (questionCount >= MAX_QUESTIONS) return;
+      questionCount += 1;
+      renderQuestionStatus();
+    });
+
+    goGuessBtn.addEventListener("click", () => {
+      renderGuessGrid();
+      showView("guess");
+    });
+
+    replayBtn.addEventListener("click", () => {
+      chicks = generateChicks(10);
+      secretChickId = null;
+      guessChickId = null;
+      questionCount = 0;
+      confirmSecretBtn.disabled = true;
+      renderSelectGrid();
+      showView("select");
+    });
+
+    backHomeBtn.addEventListener("click", () => {
+      showView("start");
+    });
+
+    // 初期表示
+    showView("start");
+  </script>
+</body>
+</html>
