@@ -301,6 +301,9 @@
           選べたら「選んだ！」ボタンを押して、質問者にスマホを渡す。
         </p>
         <div id="select-grid" class="grid mt-3"></div>
+        <button id="regenerate-btn" class="btn btn-outline mt-2">
+          もう一度生成する
+        </button>
         <button id="confirm-secret-btn" class="btn btn-primary mt-4" disabled>
           このひよこに決めた！
         </button>
@@ -388,31 +391,40 @@
     // --- 名前・性別・ひよこ画像データ生成 ---------------------------
 
     const NAMES_CUTE = [
-  "きいろ", "ちゅん", "ぴよまる", "たまご", "こむぎ", "まめ", "みるく", "ぷりん", "ちっぴ", "ほっぺ",
-  "ぴっぴ", "たま", "ちーず", "わた", "こつぶ", "プリン", "ぴーす", "おもち", "きなこ", "おはぎ",
-  "バター", "だんご", "ビスコ", "みたらし", "うどん", "ラーメン", "カレー"
-];
+      "きいろ", "ちゅん", "ぴよまる", "たまご", "こむぎ", "まめ", "みるく", "ぷりん", "ちっぴ", "ほっぺ",
+      "ぴっぴ", "たま", "ちーず", "わた", "こつぶ", "プリン", "ぴーす", "おもち", "きなこ", "おはぎ",
+      "バター", "だんご", "ビスコ", "みたらし", "うどん", "ラーメン", "カレー"
+    ];
+
     const NAMES_TOUGH = [
-  "太蔵", "剛志", "玄人（くろうと）", "武蔵", "隼人", "大河", "昇龍", "剣（つるぎ）", "鉄平", "烈火",
-  "迅（じん）", "雷（いかずち）", "隼（はやぶさ）", "大牙（たいが）", "魁（かい）", "一徹", "牙（きば）",
-  "巌（いわお）", "陣（じん）", "剛", "王牙（おうが）", "竜馬", "豪", "斬（ざん）", "虎鉄", "十兵衛", "塊（かい）"
-];
+      "太蔵", "剛志", "玄人（くろうと）", "武蔵", "隼人", "大河", "昇龍", "剣（つるぎ）", "鉄平", "烈火",
+      "迅（じん）", "雷（いかずち）", "隼（はやぶさ）", "大牙（たいが）", "魁（かい）", "一徹", "牙（きば）",
+      "巌（いわお）", "陣（じん）", "剛", "王牙（おうが）", "竜馬", "豪", "斬（ざん）", "虎鉄", "十兵衛", "塊（かい）"
+    ];
+
     const NAMES_AMERICAN = [
-  "チャーリー", "デイジー", "マックス", "レオン", "エリオット", "ヴィンセント", "ローガン", "ジェイク",
-  "ハリソン", "スカーレット", "ドクター", "モーガン", "クリス", "マディソン", "オーウェン",
-  "シドニー", "ゴッサム", "ダグラス"
-];
+      "チャーリー", "デイジー", "マックス", "レオン", "エリオット", "ヴィンセント", "ローガン", "ジェイク",
+      "ハリソン", "スカーレット", "ドクター", "モーガン", "クリス", "マディソン", "オーウェン",
+      "シドニー", "ゴッサム", "ダグラス"
+    ];
 
     const NAMES_OJISAN = [
-  "ひろし", "まさお", "えいじ", "けんいち", "たけし", "しげお", "よしお", "たかし", "あきお", "かずお",
-  "としゆき", "つよし", "としお", "みのる", "さとし", "さだお", "ひでかず", "のりお", "まさし", "けんじ",
-  "たつお", "きよし", "よしあき", "えいさく"
-];
+      "ひろし", "まさお", "えいじ", "けんいち", "たけし", "しげお", "よしお", "たかし", "あきお", "かずお",
+      "としゆき", "つよし", "としお", "みのる", "さとし", "さだお", "ひでかず", "のりお", "まさし", "けんじ",
+      "たつお", "きよし", "よしあき", "えいさく"
+    ];
 
-const ALL_NAMES = [...NAMES_CUTE, ...NAMES_TOUGH, ...NAMES_AMERICAN, ...NAMES_OJISAN];
-    const MAX_QUESTIONS = 10;
+    const ALL_NAMES = [
+      ...NAMES_CUTE,
+      ...NAMES_TOUGH,
+      ...NAMES_AMERICAN,
+      ...NAMES_OJISAN
+    ];
 
-    // ひよこ画像 URL リスト
+    // 質問上限
+    const MAX_QUESTIONS = 3;
+
+    // ひよこ画像 URL リスト（ユーザー指定の全URLを統合）
     const IMAGE_URLS = [
       "https://thumbs.dreamstime.com/b/petit-poussin-mignon-dehors-59498627.jpg",
       "https://img.lovepik.com/photo/60162/4812.jpg_wh860.jpg",
@@ -441,7 +453,15 @@ const ALL_NAMES = [...NAMES_CUTE, ...NAMES_TOUGH, ...NAMES_AMERICAN, ...NAMES_OJ
       "https://d2o4rrq92x9csx.cloudfront.net/articles/Gazo_2507-4-123.webp",
       "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTxtnBI3L3etsu-BX6N3-XZY9-DKLaEQyayBvgLahcnEAdAnHUVNZ0eTlkaqwxdfcpZPgs&usqp=CAU",
       "https://eternalcollegest.com/wp-content/uploads/2020/04/hiyoko-3-43.jpg",
-      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRHisx-HsnwL5_3EeVflgiIi3PewZmBIAxhtA&s"
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRHisx-HsnwL5_3EeVflgiIi3PewZmBIAxhtA&s",
+      "https://m.media-amazon.com/images/I/41tK6VPE0wL._SL500_.jpg",
+      "https://item-shopping.c.yimg.jp/i/n/pandahome_pillow21413-45cm_1",
+      "https://www.fashion-press.net/img/news/106257/N20.jpg",
+      "https://sgs109.com/images/i/articles/1522477810/02.jpg",
+      "https://m.media-amazon.com/images/I/41LkQm0VMjL._AC_UF894,1000_QL80_.jpg",
+      "https://tshop.r10s.jp/exceedjapan/cabinet/kotori/kotori-4/314000010000_1.jpg?fitin=720%3A720",
+      "https://img.fril.jp/img/657556552/l/2136087537.jpg?1704115457",
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTYV8BjD-ixGvMXsLD7_6fetNPwOREN7I9VSJXXDVi5gyWICh0ZBqnNmXY&s=10"
     ];
 
     // フォールバック用のひよこ画像プール（生成時にセット）
@@ -463,6 +483,7 @@ const ALL_NAMES = [...NAMES_CUTE, ...NAMES_TOUGH, ...NAMES_AMERICAN, ...NAMES_OJ
       const namesPool = [...ALL_NAMES];
       const imagesPool = [...IMAGE_URLS];
 
+      // 名前・画像ともにシャッフル
       namesPool.sort(() => Math.random() - 0.5);
       imagesPool.sort(() => Math.random() - 0.5);
 
@@ -507,6 +528,7 @@ const ALL_NAMES = [...NAMES_CUTE, ...NAMES_TOUGH, ...NAMES_AMERICAN, ...NAMES_OJ
     const startBtn           = document.getElementById("start-btn");
     const selectGrid         = document.getElementById("select-grid");
     const confirmSecretBtn   = document.getElementById("confirm-secret-btn");
+    const regenerateBtn      = document.getElementById("regenerate-btn");
     const questionCountEl    = document.getElementById("question-count");
     const questionMaxEl      = document.getElementById("question-max");
     const questionProgressEl = document.getElementById("question-progress");
@@ -551,7 +573,7 @@ const ALL_NAMES = [...NAMES_CUTE, ...NAMES_TOUGH, ...NAMES_AMERICAN, ...NAMES_OJ
         img.onerror = null;
         if (fallbackImagePool && fallbackImagePool.length > 0) {
           img.src = fallbackImagePool.shift();
-        } else {
+        } else if (IMAGE_URLS.length > 0) {
           // すべて使い切っていた場合は、最後の手段として最初の画像を再利用
           img.src = IMAGE_URLS[0];
         }
@@ -721,6 +743,13 @@ const ALL_NAMES = [...NAMES_CUTE, ...NAMES_TOUGH, ...NAMES_AMERICAN, ...NAMES_OJ
       confirmSecretBtn.disabled = true;
       renderSelectGrid();
       showView("select");
+    });
+
+    regenerateBtn.addEventListener("click", () => {
+      chicks = generateChicks(9);
+      secretChickId = null;
+      confirmSecretBtn.disabled = true;
+      renderSelectGrid();
     });
 
     confirmSecretBtn.addEventListener("click", () => {
