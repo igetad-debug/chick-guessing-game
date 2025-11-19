@@ -414,17 +414,10 @@
       "たつお", "きよし", "よしあき", "えいさく"
     ];
 
-    const ALL_NAMES = [
-      ...NAMES_CUTE,
-      ...NAMES_TOUGH,
-      ...NAMES_AMERICAN,
-      ...NAMES_OJISAN
-    ];
-
-    // 質問上限
+    const ALL_NAMES = [...NAMES_CUTE, ...NAMES_TOUGH, ...NAMES_AMERICAN, ...NAMES_OJISAN];
     const MAX_QUESTIONS = 3;
 
-    // ひよこ画像 URL リスト（ユーザー指定の全URLを統合）
+    // ひよこ画像 URL リスト
     const IMAGE_URLS = [
       "https://thumbs.dreamstime.com/b/petit-poussin-mignon-dehors-59498627.jpg",
       "https://img.lovepik.com/photo/60162/4812.jpg_wh860.jpg",
@@ -614,9 +607,15 @@
         card.appendChild(visual);
         card.appendChild(meta);
 
+        // ★ 修正ポイント：再レンダリングせず DOM 上の selected だけ更新
         card.addEventListener("click", () => {
           secretChickId = chick.id;
-          renderSelectGrid();
+
+          // すべてのカードから selected を外す
+          document.querySelectorAll(".chick-card").forEach(el => {
+            el.classList.toggle("selected", el.dataset.id === chick.id);
+          });
+
           confirmSecretBtn.disabled = false;
         });
 
